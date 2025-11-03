@@ -1,24 +1,97 @@
-import { ArrowRight, Github, Linkedin } from 'lucide-react'
-import socials from '@/data/socials.json'
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import socials from "@/data/socials.json"
 
 export default function HomePage() {
-  return (
-    <section className="space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-4xl md:text-6xl font-bold">Diogo Gonçalves</h1>
-        <p className="text-lg text-muted">Coding the future, one line at a time</p>
-      </div>
+  // --- viewport width to compute how far letters travel off-screen ---
+  const [vw, setVw] = useState(0)
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth)
+    onResize()
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
 
-      <div className="flex flex-wrap gap-3">
-        <a className="btn" href="/projects">Ver Projetos <ArrowRight size={18}/></a>
-        <a className="btn" href={socials.github} target="_blank" rel="noreferrer">
-          <Github size={18}/> GitHub
-        </a>
-        <a className="btn" href={socials.linkedin} target="_blank" rel="noreferrer">
-          <Linkedin size={18}/> LinkedIn
-        </a>
-        <a className="btn" href={socials.blog} target="_blank" rel="noreferrer">Blog</a>
-      </div>
-    </section>
+  // --- pre-split name into letters (keeps stable reference) ---
+  const letters = useMemo(() => "Diogo Gonçalves".split(""), [])
+
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen w-full text-white text-center overflow-hidden">
+      <section className="flex flex-col items-center justify-center h-screen w-full px-4 space-y-6">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Diogo Gonçalves</h1>
+        <p className="text-lg md:text-2xl text-white/70">
+          Coding the future, one line at a time
+        </p>
+        <div className="flex flex-wrap gap-4 mt-4 justify-center">
+          <button
+            className="px-6 py-3 bg-cyan-500/20 border border-cyan-400/30 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-all"
+          >
+            Ver Projetos ↓
+          </button>
+          <a
+            href={socials.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 border border-white/20 rounded-xl hover:bg-white/10 transition-all"
+          >
+            Contactar
+          </a>
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section
+        id="about"
+        className="min-h-screen flex flex-col justify-center items-center px-6 text-center max-w-3xl"
+      >
+        <h2 className="text-3xl font-semibold mb-4 text-cyan-400">Sobre mim</h2>
+        <p className="text-white/70 leading-relaxed">
+          Sou um desenvolvedor apaixonado por tecnologia, focado em criar experiências digitais simples,
+          eficientes e com impacto. Tenho interesse especial por front-end moderno, UI clean e desenvolvimento escalável.
+        </p>
+      </section>
+
+      {/* PROJECTS */}
+      <section id="projects" className="min-h-screen flex flex-col justify-center items-center px-6">
+        <h2 className="text-3xl font-semibold mb-8 text-cyan-400">Projetos</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+            >
+              <h3 className="font-semibold text-lg mb-2">Projeto {i}</h3>
+              <p className="text-sm text-white/70">
+                Breve descrição do projeto {i}. Aqui podes mostrar o que fizeste e as tecnologias usadas.
+              </p>
+              <Link href="#" className="inline-block mt-3 text-cyan-400 hover:underline text-sm">
+                Ver mais →
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* UPDATES */}
+      <section id="updates" className="min-h-screen flex flex-col justify-center items-center px-6">
+        <h2 className="text-3xl font-semibold mb-4 text-cyan-400">Updates</h2>
+        <p className="text-white/70 text-center max-w-2xl">
+          Aqui vais poder listar as tuas últimas atualizações, artigos ou projetos recentes — tudo o que quiseres partilhar.
+        </p>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" className="min-h-[60vh] flex flex-col justify-center items-center text-center space-y-4">
+        <h2 className="text-3xl font-semibold text-cyan-400 mb-2">Contacta-me</h2>
+        <p className="text-white/70">Aberto a colaborações e novas oportunidades.</p>
+        <div className="flex gap-6 mt-4">
+          <a href={socials.github} target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition">GitHub</a>
+          <a href={socials.linkedin} target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition">LinkedIn</a>
+          <a href={`mailto:${socials.email}`} className="hover:text-cyan-400 transition">Email</a>
+        </div>
+      </section>
+    </main>
   )
 }
