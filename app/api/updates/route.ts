@@ -17,7 +17,7 @@ export async function GET() {
     // ✅ lê diretamente o token do ambiente
     const token = process.env.GITHUB_TOKEN
 
-    // GITHUB COMMITS (de todos os repositórios públicos)
+    // 🐙 GITHUB COMMITS (últimos commits reais)
     try {
         const res = await fetch(`https://api.github.com/users/DCoelhoo/events/public`, {
             headers: {
@@ -25,40 +25,64 @@ export async function GET() {
                 ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
             },
             next: { revalidate: 300 },
-        })
+        });
 
         if (!res.ok) {
-            const text = await res.text()
-            console.error("Erro GitHub:", text)
-            throw new Error(text)
+            const text = await res.text();
+            console.error("❌ Erro GitHub:", text);
+            throw new Error(text);
         }
 
-        const events = await res.json()
+        const events = await res.json();
 
-        // Filtrar apenas eventos de commits (PushEvent)
-        const commits = events
-            .filter((e: any) => e.type === "PushEvent" && e.payload?.commits)
-            .flatMap((e: any) =>
-                e.payload.commits.map((c: any) => ({
-                    title: c.message || "Commit",
-                    url: `https://github.com/${e.repo.name}/commit/${c.sha}`,
-                    description: `Commit no repositório ${e.repo.name}`,
-                    source: "GitHub",
-                    date: new Date(e.created_at).toISOString(),
-                }))
-            )
+        // Pega só os eventos PushEvent recentes
+        const pushEvents = events.filter((e: any) => e.type === "PushEvent" && e.repo?.name);
 
-        // Ordenar do mais recente para o mais antigo e limitar a 5
-        const sortedCommits = commits
-            .sort((a: { date: string }, b: { date: string }) =>
-                new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-            .slice(0, 5)
+        // Busca commits reais de cada repositório envolvido
+        const allCommits: any[] = [];
 
-        console.log(`🐙 ${sortedCommits.length} commits recentes encontrados no GitHub.`)
-        updates.push(...sortedCommits)
+        for (const e of pushEvents) {
+            try {
+                const repoName = e.repo.name;
+                const commitsUrl = `https://api.github.com/repos/${repoName}/commits?per_page=5`;
+
+                const commitRes = await fetch(commitsUrl, {
+                    headers: {
+                        Accept: "application/vnd.github+json",
+                        ...(process.env.GITHUB_TOKEN
+                            ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+                            : {}),
+                    },
+                });
+
+                if (!commitRes.ok) continue;
+
+                const commitData = await commitRes.json();
+
+                commitData.forEach((c: any) => {
+                    allCommits.push({
+                        title: c.commit.message?.split("\n")[0] || "Commit",
+                        url: c.html_url,
+                        description: `Commit no repositório ${repoName}`,
+                        image: e.actor?.avatar_url || null,
+                        source: "GitHub",
+                        date: new Date(c.commit.author.date).toISOString(),
+                    });
+                });
+            } catch (innerError) {
+                console.warn("⚠️ Falha ao buscar commits do repo:", e.repo?.name, innerError);
+            }
+        }
+
+        // Ordena por data mais recente
+        const sortedCommits = allCommits
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5);
+
+        console.log(`🐙 ${sortedCommits.length} commits reais encontrados no GitHub.`);
+        updates.push(...sortedCommits);
     } catch (error) {
-        console.error("Erro ao buscar commits do GitHub:", error)
+        console.error("Erro ao buscar commits do GitHub:", error);
     }
 
     // 📰 HASHNODE BLOG (API GraphQL oficial)
