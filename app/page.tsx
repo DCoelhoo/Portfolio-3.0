@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import socials from "@/data/socials.json"
+import UpdatesFeed from "@/components/UpdateFeed"
 
 export default function HomePage() {
   // --- viewport width to compute how far letters travel off-screen ---
@@ -75,11 +76,15 @@ export default function HomePage() {
       </section>
 
       {/* UPDATES */}
-      <section id="updates" className="min-h-screen flex flex-col justify-center items-center px-6">
+      <section
+        id="updates"
+        className="min-h-screen flex flex-col justify-center items-center px-6"
+      >
         <h2 className="text-3xl font-semibold mb-4 text-cyan-400">Updates</h2>
-        <p className="text-white/70 text-center max-w-2xl">
-          Aqui vais poder listar as tuas últimas atualizações, artigos ou projetos recentes — tudo o que quiseres partilhar.
+        <p className="text-white/70 text-center max-w-2xl mb-6">
+          Últimas atividades no GitHub e artigos publicados.
         </p>
+        <UpdatesFeed />
       </section>
 
       {/* CONTACT */}
