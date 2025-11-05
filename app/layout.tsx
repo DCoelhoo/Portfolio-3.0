@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import "@/styles/globals.css"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
+import BackgroundShapes from "@/components/BackgroundShapes"
+
 
 export const metadata: Metadata = {
   title: "Diogo Gonçalves – Portfolio",
