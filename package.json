@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node --import=./env.mjs node_modules/next/dist/bin/next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "fast-xml-parser": "^5.3.1",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.552.0",

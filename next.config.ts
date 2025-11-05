@@ -1,7 +1,9 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  experimental: {
-    turbo: false, // ❌ desativa Turbopack
+import type { NextConfig } from "next"
+
+const nextConfig: NextConfig = {
+  experimental: {},
+  serverRuntimeConfig: {
+    GITHUB_TOKEN: process.env.GITHUB_TOKEN,
   },
 }
 
