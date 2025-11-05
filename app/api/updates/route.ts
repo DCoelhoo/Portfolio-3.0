@@ -17,18 +17,14 @@ export async function GET() {
     // ✅ lê diretamente o token do ambiente
     const token = process.env.GITHUB_TOKEN
 
-    // 🐙 GITHUB COMMITS
+    // GITHUB COMMITS (de todos os repositórios públicos)
     try {
-        console.log("🧠 Preparando fetch GitHub com headers:", {
-            Accept: "application/vnd.github+json",
-            Authorization: token ? `Bearer ${token.slice(0, 8)}...` : "❌ sem token",
-        })
-        const res = await fetch("https://api.github.com/users/DCoelhoo/events/public", {
+        const res = await fetch(`https://api.github.com/users/DCoelhoo/events/public`, {
             headers: {
-                "Accept": "application/vnd.github+json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                Accept: "application/vnd.github+json",
+                ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
             },
-            cache: "no-store",
+            next: { revalidate: 300 },
         })
 
         if (!res.ok) {
@@ -38,45 +34,29 @@ export async function GET() {
         }
 
         const events = await res.json()
+
+        // Filtrar apenas eventos de commits (PushEvent)
         const commits = events
             .filter((e: any) => e.type === "PushEvent" && e.payload?.commits)
-            .flatMap((e: any) => {
-                if (e.type === "PushEvent" && e.payload?.commits) {
-                    return e.payload.commits.map((c: any) => ({
-                        title: c.message || "Commit",
-                        url: `https://github.com/${e.repo.name}/commit/${c.sha}`,
-                        description: `Commit no repositório ${e.repo.name}`,
-                        source: "GitHub",
-                        date: new Date(e.created_at).toISOString(),
-                    }))
-                }
+            .flatMap((e: any) =>
+                e.payload.commits.map((c: any) => ({
+                    title: c.message || "Commit",
+                    url: `https://github.com/${e.repo.name}/commit/${c.sha}`,
+                    description: `Commit no repositório ${e.repo.name}`,
+                    source: "GitHub",
+                    date: new Date(e.created_at).toISOString(),
+                }))
+            )
 
-                // Outros eventos interessantes
-                if (e.type === "CreateEvent") {
-                    return [{
-                        title: `Novo repositório: ${e.repo.name}`,
-                        url: `https://github.com/${e.repo.name}`,
-                        description: "Repositório criado",
-                        source: "GitHub",
-                        date: new Date(e.created_at).toISOString(),
-                    }]
-                }
+        // Ordenar do mais recente para o mais antigo e limitar a 5
+        const sortedCommits = commits
+            .sort((a: { date: string }, b: { date: string }) =>
+                new Date(b.date).getTime() - new Date(a.date).getTime()
+            )
+            .slice(0, 5)
 
-                if (e.type === "IssuesEvent") {
-                    return [{
-                        title: e.payload.action === "opened" ? "Issue aberta" : "Issue atualizada",
-                        url: e.payload.issue?.html_url,
-                        description: e.payload.issue?.title,
-                        source: "GitHub",
-                        date: new Date(e.created_at).toISOString(),
-                    }]
-                }
-
-                return []
-            })
-
-        console.log(`🐙 ${commits.length} commits encontrados no GitHub.`)
-        updates.push(...commits.slice(0, 5))
+        console.log(`🐙 ${sortedCommits.length} commits recentes encontrados no GitHub.`)
+        updates.push(...sortedCommits)
     } catch (error) {
         console.error("Erro ao buscar commits do GitHub:", error)
     }
