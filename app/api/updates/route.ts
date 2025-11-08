@@ -66,7 +66,7 @@ export async function GET() {
                         description: `Commit no repositório ${repoName}`,
                         image: e.actor?.avatar_url || null,
                         source: "GitHub",
-                        date: new Date(c.commit.author.date).toISOString(),
+                        date: new Date(c.timestamp || e.created_at).toISOString(),
                     });
                 });
             } catch (innerError) {
