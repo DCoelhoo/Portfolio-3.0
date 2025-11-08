@@ -49,8 +49,7 @@ export default function HomePage() {
       >
         <h2 className="text-3xl font-semibold mb-4 text-cyan-400">Sobre mim</h2>
         <p className="text-white/70 leading-relaxed">
-          Sou um desenvolvedor apaixonado por tecnologia, focado em criar experiências digitais simples,
-          eficientes e com impacto. Tenho interesse especial por front-end moderno, UI clean e desenvolvimento escalável.
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quod ex maxime excepturi itaque eum praesentium cum, obcaecati error quos. Doloribus a ullam, deleniti quisquam aliquid facilis eaque fugit reprehenderit sed.
         </p>
       </section>
 
