@@ -19,47 +19,38 @@ export async function GET() {
 
 // 🐙 GITHUB COMMITS (últimos commits reais, sem duplicados)
 try {
-  const res = await fetch(`https://api.github.com/users/DCoelhoo/events/public`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    next: { revalidate: 300 },
-  });
-
-  if (!res.ok) throw new Error(await res.text());
-  const events = await res.json();
-
-  // pegar apenas os PushEvents
-  const pushEvents = events.filter((e: any) => e.type === "PushEvent");
-
+  const repos = ["DCoelhoo/Portfolio-3.0"]; // podes adicionar mais repositórios se quiseres
   const commits: any[] = [];
-  const seenUrls = new Set<string>();
 
-  for (const e of pushEvents) {
-    const repoName = e.repo.name;
-    for (const c of e.payload.commits) {
-      // gerar URL real do commit
-      const commitUrl = `https://github.com/${repoName}/commit/${c.sha}`;
-      if (seenUrls.has(commitUrl)) continue;
-      seenUrls.add(commitUrl);
+  for (const repoName of repos) {
+    const commitRes = await fetch(`https://api.github.com/repos/${repoName}/commits?per_page=5`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
+      },
+      next: { revalidate: 300 },
+    });
 
+    if (!commitRes.ok) throw new Error(await commitRes.text());
+    const commitData = await commitRes.json();
+
+    commitData.forEach((c: any) => {
       commits.push({
-        title: c.message?.split("\n")[0] || "Commit",
-        url: commitUrl,
+        title: c.commit.message?.split("\n")[0] || "Commit",
+        url: c.html_url,
         description: `Commit no repositório ${repoName}`,
-        image: e.actor?.avatar_url || null,
+        image: c.author?.avatar_url || c.committer?.avatar_url || null,
         source: "GitHub",
-        date: new Date(e.created_at).toISOString(),
+        date: new Date(c.commit.author.date).toISOString(),
       });
-    }
+    });
   }
 
   const sortedCommits = commits
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
-  console.log(`🐙 ${sortedCommits.length} commits únicos encontrados.`);
+  console.log(`🐙 ${sortedCommits.length} commits encontrados no GitHub.`);
   updates.push(...sortedCommits);
 } catch (error) {
   console.error("Erro ao buscar commits do GitHub:", error);
