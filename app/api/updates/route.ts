@@ -17,73 +17,53 @@ export async function GET() {
     // ✅ lê diretamente o token do ambiente
     const token = process.env.GITHUB_TOKEN
 
-    // 🐙 GITHUB COMMITS (últimos commits reais)
-    try {
-        const res = await fetch(`https://api.github.com/users/DCoelhoo/events/public`, {
-            headers: {
-                Accept: "application/vnd.github+json",
-                ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
-            },
-            next: { revalidate: 300 },
-        });
+// 🐙 GITHUB COMMITS (últimos commits reais, sem duplicados)
+try {
+  const res = await fetch(`https://api.github.com/users/DCoelhoo/events/public`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    next: { revalidate: 300 },
+  });
 
-        if (!res.ok) {
-            const text = await res.text();
-            console.error("❌ Erro GitHub:", text);
-            throw new Error(text);
-        }
+  if (!res.ok) throw new Error(await res.text());
+  const events = await res.json();
 
-        const events = await res.json();
+  // pegar apenas os PushEvents
+  const pushEvents = events.filter((e: any) => e.type === "PushEvent");
 
-        // Pega só os eventos PushEvent recentes
-        const pushEvents = events.filter((e: any) => e.type === "PushEvent" && e.repo?.name);
+  const commits: any[] = [];
+  const seenUrls = new Set<string>();
 
-        // Busca commits reais de cada repositório envolvido
-        const allCommits: any[] = [];
+  for (const e of pushEvents) {
+    const repoName = e.repo.name;
+    for (const c of e.payload.commits) {
+      // gerar URL real do commit
+      const commitUrl = `https://github.com/${repoName}/commit/${c.sha}`;
+      if (seenUrls.has(commitUrl)) continue;
+      seenUrls.add(commitUrl);
 
-        for (const e of pushEvents) {
-            try {
-                const repoName = e.repo.name;
-                const commitsUrl = `https://api.github.com/repos/${repoName}/commits?per_page=5`;
-
-                const commitRes = await fetch(commitsUrl, {
-                    headers: {
-                        Accept: "application/vnd.github+json",
-                        ...(process.env.GITHUB_TOKEN
-                            ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
-                            : {}),
-                    },
-                });
-
-                if (!commitRes.ok) continue;
-
-                const commitData = await commitRes.json();
-
-                commitData.forEach((c: any) => {
-                    allCommits.push({
-                        title: c.commit.message?.split("\n")[0] || "Commit",
-                        url: c.html_url,
-                        description: `Commit no repositório ${repoName}`,
-                        image: e.actor?.avatar_url || null,
-                        source: "GitHub",
-                        date: new Date(c.commit.author.date).toISOString(),
-                    });
-                });
-            } catch (innerError) {
-                console.warn("⚠️ Falha ao buscar commits do repo:", e.repo?.name, innerError);
-            }
-        }
-
-        // Ordena por data mais recente
-        const sortedCommits = allCommits
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 5);
-
-        console.log(`🐙 ${sortedCommits.length} commits reais encontrados no GitHub.`);
-        updates.push(...sortedCommits);
-    } catch (error) {
-        console.error("Erro ao buscar commits do GitHub:", error);
+      commits.push({
+        title: c.message?.split("\n")[0] || "Commit",
+        url: commitUrl,
+        description: `Commit no repositório ${repoName}`,
+        image: e.actor?.avatar_url || null,
+        source: "GitHub",
+        date: new Date(e.created_at).toISOString(),
+      });
     }
+  }
+
+  const sortedCommits = commits
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
+  console.log(`🐙 ${sortedCommits.length} commits únicos encontrados.`);
+  updates.push(...sortedCommits);
+} catch (error) {
+  console.error("Erro ao buscar commits do GitHub:", error);
+}
 
     // 📰 HASHNODE BLOG (API GraphQL oficial)
     try {
