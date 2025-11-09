@@ -17,7 +17,7 @@ export function AnimatedBackground() {
   // podes também brincar com opacidade/scale se quiseres:
   // const fogOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.85])
 
-  // ✨ partículas só no cliente (evita hydration mismatch)
+  // partículas só no cliente (evita hydration mismatch)
   const [particles, setParticles] = useState<Particle[]>([])
   useEffect(() => {
     const count = 50 // reduz se precisares de mais perf

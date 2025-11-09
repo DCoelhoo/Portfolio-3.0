@@ -5,6 +5,8 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import Link from "next/link"
 import socials from "@/data/socials.json"
 import UpdatesFeed from "@/components/UpdateFeed"
+import TechCarousel from "@/components/TechCarousel"
+import Projects from "@/components/Projects"
 
 export default function HomePage() {
   const [vw, setVw] = useState(0)
@@ -72,26 +74,10 @@ export default function HomePage() {
         </p>
       </section>
 
+      <TechCarousel />
+
       {/* PROJECTS, UPDATES e CONTACT — mantém igual */}
-      <section id="projects" className="min-h-screen flex flex-col justify-center items-center px-6">
-        <h2 className="text-3xl font-semibold mb-8 text-cyan-400">Projetos</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
-            >
-              <h3 className="font-semibold text-lg mb-2">Projeto {i}</h3>
-              <p className="text-sm text-white/70">
-                Breve descrição do projeto {i}. Aqui podes mostrar o que fizeste e as tecnologias usadas.
-              </p>
-              <Link href="#" className="inline-block mt-3 text-cyan-400 hover:underline text-sm">
-                Ver mais →
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Projects />
 
       <section id="updates" className="min-h-screen flex flex-col justify-center items-center px-6">
         <UpdatesFeed />
