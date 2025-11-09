@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
 import Link from "next/link"
 import socials from "@/data/socials.json"
 import UpdatesFeed from "@/components/UpdateFeed"
 
 export default function HomePage() {
-  // --- viewport width to compute how far letters travel off-screen ---
   const [vw, setVw] = useState(0)
   useEffect(() => {
     const onResize = () => setVw(window.innerWidth)
@@ -14,23 +14,42 @@ export default function HomePage() {
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
   }, [])
-
-  // --- pre-split name into letters (keeps stable reference) ---
-  const letters = useMemo(() => "Diogo Gonçalves".split(""), [])
+  const ref = useRef(null)
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen w-full text-white text-center overflow-hidden">
-      <section className="flex flex-col items-center justify-center h-screen w-full px-4 space-y-6">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Diogo Gonçalves</h1>
-        <p className="text-lg md:text-2xl text-white/70">
+    <main ref={ref} className="flex flex-col items-center justify-center min-h-screen w-full text-white text-center overflow-hidden">
+      {/* HERO COM PARALLAX SUAVE E PROFUNDIDADE REAL */}
+      <section className="flex flex-col items-center justify-center h-screen w-full px-4 text-center space-y-6">
+        <motion.h1
+          className="text-5xl md:text-7xl font-bold tracking-tight"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          Diogo Gonçalves
+        </motion.h1>
+
+        <motion.p
+          className="text-lg md:text-2xl text-white/70"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 1 }}
+        >
           Coding the future, one line at a time
-        </p>
-        <div className="flex flex-wrap gap-4 mt-4 justify-center">
-          <button
+        </motion.p>
+
+        <motion.div
+          className="flex flex-wrap gap-4 mt-4 justify-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 1 }}
+        >
+          <a
+            href="#projects"
             className="px-6 py-3 bg-cyan-500/20 border border-cyan-400/30 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-all"
           >
             Ver Projetos ↓
-          </button>
+          </a>
           <a
             href={socials.linkedin}
             target="_blank"
@@ -39,7 +58,7 @@ export default function HomePage() {
           >
             Contactar
           </a>
-        </div>
+        </motion.div>
       </section>
 
       {/* ABOUT */}
@@ -53,7 +72,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* PROJECTS */}
+      {/* PROJECTS, UPDATES e CONTACT — mantém igual */}
       <section id="projects" className="min-h-screen flex flex-col justify-center items-center px-6">
         <h2 className="text-3xl font-semibold mb-8 text-cyan-400">Projetos</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
@@ -74,15 +93,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* UPDATES */}
-      <section
-        id="updates"
-        className="min-h-screen flex flex-col justify-center items-center px-6"
-      >
+      <section id="updates" className="min-h-screen flex flex-col justify-center items-center px-6">
         <UpdatesFeed />
       </section>
 
-      {/* CONTACT */}
       <section id="contact" className="min-h-[60vh] flex flex-col justify-center items-center text-center space-y-4">
         <h2 className="text-3xl font-semibold text-cyan-400 mb-2">Contacta-me</h2>
         <p className="text-white/70">Aberto a colaborações e novas oportunidades.</p>
