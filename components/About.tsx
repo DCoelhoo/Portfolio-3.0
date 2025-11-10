@@ -81,7 +81,7 @@ export default function AboutSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
             >
-                I’m a Computer Science graduate passionate about building efficient,
+                I’m a Computer Engineering graduate passionate about building efficient,
                 user-focused web applications. With hands-on experience in full-stack
                 development, systems design, and project collaboration, I strive to turn
                 technical knowledge into practical, meaningful solutions that make
