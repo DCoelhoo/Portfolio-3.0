@@ -42,10 +42,14 @@ Built using modern web technologies:
 ## Project Structure
 
 app/
-┣ components/      # Reusable UI components (Navbar, Footer, Hero, etc.)
-┣ api/             # Serverless functions (GitHub + Hashnode integrations)
-┣ styles/          # Global CSS (Tailwind + custom styling)
-┣ lib/             # Utility functions (e.g., GitHub token helper)
+┣ components/
+┃ ┗ Reusable UI components (Navbar, Footer, Hero, etc.)
+┣ api/
+┃ ┗ Serverless functions (GitHub + Hashnode integrations)
+┣ styles/
+┃ ┗ Global CSS (Tailwind + custom styling)
+┣ lib/
+┃ ┗ Utility functions (e.g., GitHub token helper)
 ┗ page.tsx         # Home page
 
 ---
