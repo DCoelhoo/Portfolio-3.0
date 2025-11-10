@@ -1,26 +1,42 @@
 "use client"
 
-import { useEffect, useMemo, useState, useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
-import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import socials from "@/data/socials.json"
 import UpdatesFeed from "@/components/UpdateFeed"
 import TechCarousel from "@/components/TechCarousel"
 import Projects from "@/components/Projects"
+import About from "@/components/About"
+import Contact from "@/components/Contact"
 
+/**
+ * HomePage Component
+ *
+ * This is the main landing page of the portfolio.
+ * It contains the hero section, about section, technology carousel,
+ * projects showcase, updates feed, and contact form.
+ */
 export default function HomePage() {
-  const [vw, setVw] = useState(0)
+  const [viewportWidth, setViewportWidth] = useState(0)
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  /**
+   * Updates viewport width on resize.
+   * Used for responsive behavior in animations or layout adjustments.
+   */
   useEffect(() => {
-    const onResize = () => setVw(window.innerWidth)
-    onResize()
-    window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
+    const handleResize = () => setViewportWidth(window.innerWidth)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
-  const ref = useRef(null)
 
   return (
-    <main ref={ref} className="flex flex-col items-center justify-center min-h-screen w-full text-white text-center overflow-hidden">
-      {/* HERO COM PARALLAX SUAVE E PROFUNDIDADE REAL */}
+    <main
+      ref={ref}
+      className="flex flex-col items-center justify-center min-h-screen w-full text-white text-center overflow-hidden"
+    >
+      {/* HERO SECTION — main introduction */}
       <section className="flex flex-col items-center justify-center h-screen w-full px-4 text-center space-y-6">
         <motion.h1
           className="text-5xl md:text-7xl font-bold tracking-tight"
@@ -40,6 +56,7 @@ export default function HomePage() {
           Coding the future, one line at a time
         </motion.p>
 
+        {/* Hero Buttons */}
         <motion.div
           className="flex flex-wrap gap-4 mt-4 justify-center"
           initial={{ opacity: 0, y: 10 }}
@@ -48,50 +65,40 @@ export default function HomePage() {
         >
           <a
             href="#projects"
-            className="px-6 py-3 bg-cyan-500/20 border border-cyan-400/30 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-all"
+            className="px-6 py-3 bg-cyan-500/20 border border-cyan-400/30 hover:bg-cyan-500/40 text-cyan-400 rounded-xl transition-all cursor-pointer"
           >
-            Ver Projetos ↓
+            View Projects ↓
           </a>
           <a
             href={socials.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 border border-white/20 rounded-xl hover:bg-white/10 transition-all"
+            className="px-6 py-3 border border-white/20 rounded-xl hover:bg-white/10 transition-all cursor-pointer"
           >
-            Contactar
+            Contact Me
           </a>
         </motion.div>
       </section>
 
-      {/* ABOUT */}
-      <section
-        id="about"
-        className="min-h-screen flex flex-col justify-center items-center px-6 text-center max-w-3xl"
-      >
-        <h2 className="text-3xl font-semibold mb-4 text-cyan-400">Sobre mim</h2>
-        <p className="text-white/70 leading-relaxed">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quod ex maxime excepturi itaque eum praesentium cum, obcaecati error quos. Doloribus a ullam, deleniti quisquam aliquid facilis eaque fugit reprehenderit sed.
-        </p>
-      </section>
+      {/* ABOUT SECTION */}
+      <About />
 
+      {/* TECHNOLOGIES CAROUSEL */}
       <TechCarousel />
 
-      {/* PROJECTS, UPDATES e CONTACT — mantém igual */}
+      {/* PROJECTS SECTION */}
       <Projects />
 
-      <section id="updates" className="min-h-screen flex flex-col justify-center items-center px-6">
+      {/* UPDATES FEED (GitHub, Blog, LinkedIn) */}
+      <section
+        id="updates"
+        className="min-h-screen flex flex-col justify-center items-center px-6"
+      >
         <UpdatesFeed />
       </section>
 
-      <section id="contact" className="min-h-[60vh] flex flex-col justify-center items-center text-center space-y-4">
-        <h2 className="text-3xl font-semibold text-cyan-400 mb-2">Contacta-me</h2>
-        <p className="text-white/70">Aberto a colaborações e novas oportunidades.</p>
-        <div className="flex gap-6 mt-4">
-          <a href={socials.github} target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition">GitHub</a>
-          <a href={socials.linkedin} target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition">LinkedIn</a>
-          <a href={`mailto:${socials.email}`} className="hover:text-cyan-400 transition">Email</a>
-        </div>
-      </section>
+      {/* CONTACT SECTION */}
+      <Contact />
     </main>
   )
 }

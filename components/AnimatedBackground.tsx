@@ -3,34 +3,56 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 
-type Particle = { x: number; y: number; size: number; delay: number }
+/** Defines the properties of each animated particle. */
+type Particle = {
+  x: number
+  y: number
+  size: number
+  delay: number
+}
 
+/**
+ * AnimatedBackground Component
+ *
+ * Renders a smooth animated background composed of:
+ * - Parallax gradients that move based on scroll position
+ * - Floating cyan particles with subtle motion
+ *
+ * The animation is entirely client-side and avoids hydration mismatches
+ * by generating particles only after the component mounts.
+ */
 export function AnimatedBackground() {
-  // ⚡️ parallax por scroll
-  const { scrollYProgress } = useScroll() // 0 → topo, 1 → fundo
-  // camada de gradiente move mais (parallax forte)
+  // --- Scroll-based parallax motion values ---
+  const { scrollYProgress } = useScroll()
+
+  // Gradient parallax movement (moves more intensely)
   const gradX = useTransform(scrollYProgress, [0, 1], ["0px", "140px"])
   const gradY = useTransform(scrollYProgress, [0, 1], ["0px", "220px"])
-  // partículas movem menos (parallax subtil)
+
+  // Particle parallax movement (moves more subtly)
   const layerX = useTransform(scrollYProgress, [0, 1], ["0px", "60px"])
   const layerY = useTransform(scrollYProgress, [0, 1], ["0px", "100px"])
-  // podes também brincar com opacidade/scale se quiseres:
-  // const fogOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.85])
 
-  // partículas só no cliente (evita hydration mismatch)
+  // --- Particle generation ---
   const [particles, setParticles] = useState<Particle[]>([])
+
+  /**
+   * Generates a fixed number of random particles after mounting.
+   * Each particle is given random coordinates, size, and delay to
+   * create a natural floating effect.
+   */
   useEffect(() => {
-    const count = 50 // reduz se precisares de mais perf
-    const arr = Array.from({ length: count }, () => ({
+    const count = 50 // reduce this number if performance becomes an issue
+    const generatedParticles = Array.from({ length: count }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
       size: Math.random() * 4 + 2,
       delay: Math.random() * 5,
     }))
-    setParticles(arr)
+    setParticles(generatedParticles)
   }, [])
 
-  // memo para não re-renderizar tudo
+  // --- Memoized particle nodes to prevent unnecessary re-renders ---
   const particleNodes = useMemo(
     () =>
       particles.map((p, i) => (
@@ -63,7 +85,7 @@ export function AnimatedBackground() {
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/* 🌫️ névoa/gradiente com parallax mais intenso */}
+      {/* Background gradient with stronger parallax effect */}
       <motion.div
         className="absolute inset-0"
         style={{
@@ -73,13 +95,12 @@ export function AnimatedBackground() {
             "radial-gradient(circle at 20% 30%, rgba(34,211,238,0.20), transparent 60%), radial-gradient(circle at 80% 70%, rgba(147,51,234,0.22), transparent 60%), radial-gradient(circle at 50% 50%, rgba(14,165,233,0.14), transparent 80%)",
           backgroundSize: "200% 200%",
           filter: "blur(100px)",
-          // opacity: fogOpacity,
         }}
         animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
         transition={{ duration: 25, ease: "linear", repeat: Infinity }}
       />
 
-      {/* ✨ partículas com parallax suave */}
+      {/* Floating particles layer with subtle parallax */}
       <div className="absolute inset-0">{particleNodes}</div>
     </div>
   )

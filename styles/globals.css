@@ -1,14 +1,42 @@
 @import "tailwindcss";
 
+/* 
+  === Global Theme Configuration ===
+  Enforces a dark color scheme across the site 
+  and applies consistent base styling for the body and HTML root.
+*/
 :root {
   color-scheme: dark;
 }
 
-html, body {
+/* 
+  === Base Page Styles ===
+  - Sets black background and white text
+  - Removes default margins/padding
+  - Ensures smooth font rendering and prevents horizontal scroll overflow
+*/
+html,
+body {
   @apply bg-black text-white antialiased;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   background-color: transparent;
-  
+}
+
+/* 
+  === Scrollbar Hiding Utility ===
+  Hides the scrollbar visually while keeping scroll functionality active.
+  Useful for horizontal animations and overflow elements.
+*/
+
+/* Chrome, Safari, Edge (WebKit) */
+.scrollbar-hide::-webkit-scrollbar {
+  height: 0; /* makes scrollbar invisible */
+}
+
+/* Firefox + legacy Edge/IE */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* for IE and Edge */
+  scrollbar-width: none; /* for Firefox */
 }
