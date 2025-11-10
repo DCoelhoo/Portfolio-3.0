@@ -17,6 +17,10 @@ const technologies = [
   { name: "PHP", logo: "/logos/php.svg", url: "https://www.php.net/" },
   { name: "Python", logo: "/logos/python.svg", url: "https://www.python.org/" },
   { name: "React", logo: "/logos/react.svg", url: "https://react.dev/" },
+  { name: "C#", logo: "/logos/csharp.svg", url: "https://dotnet.microsoft.com/en-us/languages/csharp" },
+  { name: "Laravel", logo: "/logos/laravel.svg", url: "https://laravel.com/" },
+  { name: "TypeScript", logo: "/logos/typescript.svg", url: "https://www.typescriptlang.org/" },
+  { name: "Git", logo: "/logos/git.svg", url: "https://git-scm.com/" },
 ]
 
 /**
