@@ -101,7 +101,7 @@ export default function UpdateFeed() {
     <section className="py-12">
       {/* New Section Title */}
       <h2 className="text-3xl font-bold text-center text-cyan-400 mb-3">
-        My Last Updates
+        Updates
       </h2>
       <p className="text-center text-white/60 mb-10 text-sm">
         My last GitHub commits and blog articles.
