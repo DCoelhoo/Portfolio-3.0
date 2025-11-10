@@ -44,7 +44,7 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          Diogo Gonçalves
+          Developer &amp; Tech Enthusiast
         </motion.h1>
 
         <motion.p

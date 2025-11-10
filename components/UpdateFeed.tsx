@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Github, Newspaper, Linkedin } from "lucide-react"
+import { Github, Newspaper } from "lucide-react"
 
 /**
  * Interface representing a single update entry.
- * Updates may come from GitHub commits, Hashnode blog posts, or LinkedIn activities.
+ * Updates may come from GitHub commits, Hashnode blog posts
  */
 interface Update {
   title: string
@@ -52,7 +52,7 @@ function timeAgo(dateString: string): string {
 /**
  * UpdateFeed Component
  *
- * Displays recent activity from GitHub, Hashnode, and LinkedIn.
+ * Displays recent activity from GitHub and Hashnode
  * - Fetches updates from the `/api/updates` endpoint.
  * - Categorizes updates by source.
  * - Displays each in a responsive, colored column layout.
@@ -81,11 +81,6 @@ export default function UpdateFeed() {
 
   const blog = updates
     .filter((u) => u.source === "Hashnode")
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3)
-
-  const linkedin = updates
-    .filter((u) => u.source === "LinkedIn")
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 3)
 
@@ -179,7 +174,6 @@ export default function UpdateFeed() {
               "https://cdn.hashnode.com/res/hashnode/image/upload/v1753393025418/ad9ce15a-0fd0-4cbe-8fe4-698b2e7f7462.jpeg?w=500&h=500&fit=crop&auto=compress,format&format=webp",
           }))}
         />
-        <Column title="LinkedIn" icon={Linkedin} color="blue" data={linkedin} />
       </div>
     </section>
   )
