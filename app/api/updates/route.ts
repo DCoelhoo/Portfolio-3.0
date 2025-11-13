@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server"
-import { XMLParser } from "fast-xml-parser"
-import socials from "@/data/socials.json"
 
 export const runtime = "nodejs"
 
-/**
- * GET handler for the /api/updates route.
- * Fetches the latest updates from GitHub and Hashnode.
- * Returns a JSON array containing recent commits and blog posts.
- */
 export async function GET() {
-  // Define the structure of an update item
   const updates: {
     title: string
     url: string
@@ -21,57 +13,68 @@ export async function GET() {
   }[] = []
 
   const token = process.env.GITHUB_TOKEN
+  const headers = {
+    Accept: "application/vnd.github+json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
 
-  /**
-   * GITHUB COMMITS
-   * Fetches the most recent commits from selected repositories.
-   */
+  /** -----------------------------------------
+   * 1. FETCH ALL PUBLIC REPOSITORIES
+   * ----------------------------------------- */
+  let repos: any[] = []
   try {
-    const repos = ["DCoelhoo/Portfolio-3.0"]
+    const repoRes = await fetch(
+      "https://api.github.com/users/DCoelhoo/repos?per_page=100",
+      { headers }
+    )
+
+    if (!repoRes.ok) throw new Error(await repoRes.text())
+    repos = await repoRes.json()
+  } catch (err) {
+    console.error("Error fetching repositories:", err)
+  }
+
+  /** -----------------------------------------
+   * 2. FETCH RECENT COMMITS FROM EACH REPO
+   * ----------------------------------------- */
+  try {
     const commits: any[] = []
 
-    for (const repoName of repos) {
+    for (const repo of repos) {
+      const repoName = repo.full_name
       const commitRes = await fetch(
-        `https://api.github.com/repos/${repoName}/commits?per_page=5`,
-        {
-          headers: {
-            Accept: "application/vnd.github+json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          next: { revalidate: 300 }, // Cache for 5 minutes
-        }
+        `https://api.github.com/repos/${repoName}/commits?per_page=3`,
+        { headers }
       )
 
-      if (!commitRes.ok) throw new Error(await commitRes.text())
+      if (!commitRes.ok) continue
       const commitData = await commitRes.json()
 
-      commitData.forEach((commit: any) => {
+      commitData.forEach((c: any) => {
         commits.push({
-          title: commit.commit.message?.split("\n")[0] || "Commit",
-          url: commit.html_url,
+          title: c.commit.message?.split("\n")[0] || "Commit",
+          url: c.html_url,
           description: `Commit in repository ${repoName}`,
-          image: commit.author?.avatar_url || commit.committer?.avatar_url || null,
+          image: c.author?.avatar_url || c.committer?.avatar_url || null,
           source: "GitHub",
-          date: new Date(commit.commit.author.date).toISOString(),
+          date: new Date(c.commit.author.date).toISOString(),
         })
       })
     }
 
-    // Sort commits by date and limit to the 5 most recent
-    const sortedCommits = commits
+    // Sort commits by date and limit globally (optional)
+    const sorted = commits
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5)
+      .slice(0, 10)
 
-    console.log(`${sortedCommits.length} commits fetched from GitHub.`)
-    updates.push(...sortedCommits)
+    updates.push(...sorted)
   } catch (error) {
-    console.error("Error fetching commits from GitHub:", error)
+    console.error("Error fetching commits:", error)
   }
 
-  /**
-   * HASHNODE BLOG POSTS
-   * Fetches the latest blog posts using the Hashnode GraphQL API.
-   */
+  /** -----------------------------------------
+   * 3. FETCH HASHNODE BLOG POSTS
+   * ----------------------------------------- */
   try {
     const res = await fetch("https://gql.hashnode.com", {
       method: "POST",
@@ -100,28 +103,21 @@ export async function GET() {
     const { data } = await res.json()
     const posts = data?.publication?.posts?.edges || []
 
-    if (posts.length > 0) {
-      updates.push(
-        ...posts.map((edge: any) => ({
-          title: edge.node.title,
-          url: `https://404nights.hashnode.dev/${edge.node.slug}`,
-          description: edge.node.brief,
-          image: edge.node.coverImage?.url || null,
-          source: "Hashnode",
-          date: new Date(edge.node.publishedAt).toISOString(),
-        }))
-      )
-      console.log(`${posts.length} post(s) fetched from Hashnode.`)
-    } else {
-      console.warn("No posts found on Hashnode (GraphQL API).")
-    }
+    posts.forEach((p: any) =>
+      updates.push({
+        title: p.node.title,
+        url: `https://404nights.hashnode.dev/${p.node.slug}`,
+        description: p.node.brief,
+        image: p.node.coverImage?.url || null,
+        source: "Hashnode",
+        date: new Date(p.node.publishedAt).toISOString(),
+      })
+    )
   } catch (error) {
-    console.error("Error fetching posts from Hashnode:", error)
+    console.error("Error fetching blog posts:", error)
   }
 
-  /**
-   * Sort all updates by date (most recent first)
-   */
+  /** Sort everything */
   updates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return NextResponse.json(updates)
