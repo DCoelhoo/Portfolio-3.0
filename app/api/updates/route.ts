@@ -1,75 +1,58 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
-export const runtime = "nodejs"
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const updates: {
-    title: string
-    url: string
-    description?: string
-    image?: string | null
-    source: string
-    date: string
-  }[] = []
+    title: string;
+    url: string;
+    description?: string;
+    image?: string | null;
+    source: string;
+    date: string;
+  }[] = [];
 
-  const token = process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_TOKEN;
   const headers = {
     Accept: "application/vnd.github+json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
+  };
 
   /** -----------------------------------------
-   * 1. FETCH ALL PUBLIC REPOSITORIES
-   * ----------------------------------------- */
-  let repos: any[] = []
-  try {
-    const repoRes = await fetch(
-      "https://api.github.com/users/DCoelhoo/repos?per_page=100",
-      { headers }
-    )
-
-    if (!repoRes.ok) throw new Error(await repoRes.text())
-    repos = await repoRes.json()
-  } catch (err) {
-    console.error("Error fetching repositories:", err)
-  }
-
-  /** -----------------------------------------
-   * 2. FETCH RECENT COMMITS FROM EACH REPO
+   * GITHUB: FETCH LATEST COMMITS (1 request)
    * ----------------------------------------- */
   try {
-    const commits: any[] = []
+    const commitRes = await fetch(
+      "https://api.github.com/search/commits?q=author:DCoelhoo&sort=committer-date&order=desc&per_page=10",
+      {
+        headers: {
+          ...headers,
+          // GitHub requer este Accept para search commits em algumas configs
+          Accept: "application/vnd.github+json",
+        },
+        cache: "no-store",
+      },
+    );
 
-    for (const repo of repos) {
-      const repoName = repo.full_name
-      const commitRes = await fetch(
-        `https://api.github.com/repos/${repoName}/commits?per_page=3`,
-        { headers }
-      )
+    if (!commitRes.ok) throw new Error(await commitRes.text());
+    const data = await commitRes.json();
 
-      if (!commitRes.ok) continue
-      const commitData = await commitRes.json()
+    const commits = (data.items ?? []).map((c: any) => ({
+      title: c.commit?.message?.split("\n")[0] || "Commit",
+      url: c.html_url,
+      description:
+        `Commit in repository ${c.repository?.full_name ?? ""}`.trim(),
+      image: c.author?.avatar_url || null,
+      source: "GitHub",
+      date: new Date(
+        c.commit?.committer?.date ?? c.commit?.author?.date,
+      ).toISOString(),
+    }));
 
-      commitData.forEach((c: any) => {
-        commits.push({
-          title: c.commit.message?.split("\n")[0] || "Commit",
-          url: c.html_url,
-          description: `Commit in repository ${repoName}`,
-          image: c.author?.avatar_url || c.committer?.avatar_url || null,
-          source: "GitHub",
-          date: new Date(c.commit.author.date).toISOString(),
-        })
-      })
-    }
-
-    // Sort commits by date and limit globally (optional)
-    const sorted = commits
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10)
-
-    updates.push(...sorted)
+    updates.push(...commits);
   } catch (error) {
-    console.error("Error fetching commits:", error)
+    console.error("Error fetching commits:", error);
   }
 
   /** -----------------------------------------
@@ -98,10 +81,10 @@ export async function GET() {
           }
         `,
       }),
-    })
+    });
 
-    const { data } = await res.json()
-    const posts = data?.publication?.posts?.edges || []
+    const { data } = await res.json();
+    const posts = data?.publication?.posts?.edges || [];
 
     posts.forEach((p: any) =>
       updates.push({
@@ -111,14 +94,16 @@ export async function GET() {
         image: p.node.coverImage?.url || null,
         source: "Hashnode",
         date: new Date(p.node.publishedAt).toISOString(),
-      })
-    )
+      }),
+    );
   } catch (error) {
-    console.error("Error fetching blog posts:", error)
+    console.error("Error fetching blog posts:", error);
   }
 
   /** Sort everything */
-  updates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  updates.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 
-  return NextResponse.json(updates)
+  return NextResponse.json(updates);
 }
