@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 /**
  * List of featured projects to display on the portfolio.
@@ -29,11 +29,16 @@ const projects = [
     link: "https://github.com/DCoelhoo/Portfolio-3.0",
   },
   {
-    title: "Condominium Desktop App",
-    desc: "A desktop application for condominium management built with Python (public soon).",
-    link: "https://github.com/DCoelhoo/CondominioApp",
+    title: "UPropertyMarket",
+    desc: "A platform to buy and sell properties without comissions.",
+    link: "https://upropertymarket.pt",
   },
-]
+  {
+    title: "DGS Notifica",
+    desc: "NOTIFICA is the national platform for reporting and managing patient-safety incidents across the healthcare system.",
+    link: "https://notifica.dgs.min-saude.pt",
+  },
+];
 
 /**
  * Projects Component
@@ -44,7 +49,10 @@ const projects = [
  */
 export default function Projects() {
   return (
-    <section id="projects" className="min-h-screen flex flex-col justify-center items-center px-6">
+    <section
+      id="projects"
+      className="min-h-screen flex flex-col justify-center items-center px-6"
+    >
       {/* Section Title */}
       <h2 className="text-3xl font-semibold mb-8 text-cyan-400">Projects</h2>
 
@@ -69,7 +77,12 @@ export default function Projects() {
               borderColor: "rgba(34,211,238,0.9)",
               boxShadow: "0 0 25px rgba(34,211,238,0.2)",
             }}
-            transition={{ type: "spring", stiffness: 350, damping: 20, mass: 0.3 }}
+            transition={{
+              type: "spring",
+              stiffness: 350,
+              damping: 20,
+              mass: 0.3,
+            }}
           >
             <Link
               href={project.link}
@@ -78,7 +91,9 @@ export default function Projects() {
               className="block h-full p-6 rounded-xl border border-white/10 bg-white/5 transition-all duration-300 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             >
               {/* Project Title */}
-              <h3 className="font-semibold text-lg mb-2 text-white">{project.title}</h3>
+              <h3 className="font-semibold text-lg mb-2 text-white">
+                {project.title}
+              </h3>
 
               {/* Project Description */}
               <p className="text-sm text-white/70">{project.desc}</p>
@@ -87,5 +102,5 @@ export default function Projects() {
         ))}
       </motion.div>
     </section>
-  )
+  );
 }
