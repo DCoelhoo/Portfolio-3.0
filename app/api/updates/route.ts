@@ -55,51 +55,6 @@ export async function GET() {
     console.error("Error fetching commits:", error);
   }
 
-  /** -----------------------------------------
-   * 3. FETCH HASHNODE BLOG POSTS
-   * ----------------------------------------- */
-  try {
-    const res = await fetch("https://gql.hashnode.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          query {
-            publication(host: "404nights.hashnode.dev") {
-              posts(first: 3) {
-                edges {
-                  node {
-                    title
-                    brief
-                    slug
-                    coverImage { url }
-                    publishedAt
-                  }
-                }
-              }
-            }
-          }
-        `,
-      }),
-    });
-
-    const { data } = await res.json();
-    const posts = data?.publication?.posts?.edges || [];
-
-    posts.forEach((p: any) =>
-      updates.push({
-        title: p.node.title,
-        url: `https://404nights.hashnode.dev/${p.node.slug}`,
-        description: p.node.brief,
-        image: p.node.coverImage?.url || null,
-        source: "Hashnode",
-        date: new Date(p.node.publishedAt).toISOString(),
-      }),
-    );
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-  }
-
   /** Sort everything */
   updates.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
