@@ -1,7 +1,8 @@
 import type { NextConfig } from "next"
 
-const nextConfig: NextConfig = {
-  experimental: {},
-}
+const nextConfig = {
+  output: "export",
+  images: { unoptimized: true },
+};
 
-export default nextConfig
+module.exports = nextConfig;
