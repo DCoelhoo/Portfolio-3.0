@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+﻿export const onRequestGet = async (context: any) => {
+  const cacheKey = new Request(new URL(context.request.url).toString(), { method: "GET" });
+  const cache = (caches as any).default;
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
-export async function GET() {
   const updates: {
     title: string;
     url: string;
@@ -13,26 +13,19 @@ export async function GET() {
     date: string;
   }[] = [];
 
-  const token = process.env.GITHUB_TOKEN;
-  const headers = {
+  const token = context.env?.GITHUB_TOKEN as string | undefined;
+
+  const ghHeaders: Record<string, string> = {
     Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  /** -----------------------------------------
-   * GITHUB: FETCH LATEST COMMITS (1 request)
-   * ----------------------------------------- */
+  // GitHub commits
   try {
     const commitRes = await fetch(
       "https://api.github.com/search/commits?q=author:DCoelhoo&sort=committer-date&order=desc&per_page=10",
-      {
-        headers: {
-          ...headers,
-          // GitHub requer este Accept para search commits em algumas configs
-          Accept: "application/vnd.github+json",
-        },
-        cache: "no-store",
-      },
+      { headers: ghHeaders },
     );
 
     if (!commitRes.ok) throw new Error(await commitRes.text());
@@ -41,13 +34,10 @@ export async function GET() {
     const commits = (data.items ?? []).map((c: any) => ({
       title: c.commit?.message?.split("\n")[0] || "Commit",
       url: c.html_url,
-      description:
-        `Commit in repository ${c.repository?.full_name ?? ""}`.trim(),
+      description: `Commit in repository ${c.repository?.full_name ?? ""}`.trim(),
       image: c.author?.avatar_url || null,
       source: "GitHub",
-      date: new Date(
-        c.commit?.committer?.date ?? c.commit?.author?.date,
-      ).toISOString(),
+      date: new Date(c.commit?.committer?.date ?? c.commit?.author?.date).toISOString(),
     }));
 
     updates.push(...commits);
@@ -55,9 +45,7 @@ export async function GET() {
     console.error("Error fetching commits:", error);
   }
 
-  /** -----------------------------------------
-   * 3. FETCH HASHNODE BLOG POSTS
-   * ----------------------------------------- */
+  // Hashnode
   try {
     const res = await fetch("https://gql.hashnode.com", {
       method: "POST",
@@ -100,10 +88,15 @@ export async function GET() {
     console.error("Error fetching blog posts:", error);
   }
 
-  /** Sort everything */
-  updates.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
+  updates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  return NextResponse.json(updates);
-}
+  const response = new Response(JSON.stringify(updates), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "public, max-age=60",
+    },
+  });
+
+  context.waitUntil?.(cache.put(cacheKey, response.clone()));
+  return response;
+};
