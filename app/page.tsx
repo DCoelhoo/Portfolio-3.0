@@ -89,13 +89,13 @@ export default function HomePage() {
       {/* PROJECTS SECTION */}
       <Projects />
 
-      {/* UPDATES FEED */}
+      {/* UPDATES FEED 
       <section
         id="updates"
         className="min-h-screen flex flex-col justify-center items-center px-6"
       >
         <UpdatesFeed />
-      </section>
+      </section>*/}
 
       {/* CONTACT SECTION */}
       <Contact />
