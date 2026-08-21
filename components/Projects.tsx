@@ -38,6 +38,11 @@ const projects = [
     desc: "NOTIFICA is the national platform for reporting and managing patient-safety incidents across the healthcare system.",
     link: "https://notifica.dgs.min-saude.pt",
   },
+  {
+    title: "Daytile: Habit Tracker",
+    desc: "Daytile is a simple habit tracker IOS app.",
+    link: "https://dcoelhoo.github.io/daytile-site/",
+  },
 ];
 
 /**
