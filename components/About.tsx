@@ -90,7 +90,7 @@ export default function AboutSection() {
         experience in full-stack development, systems design, and project
         collaboration, I strive to turn technical knowledge into practical,
         meaningful solutions that make technology simple, intuitive, and
-        genuinely useful — helping people spend less time managing technology
+        genuinely useful helping people spend less time managing technology
         and more time living their lives.
       </motion.p>
 
