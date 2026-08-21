@@ -39,11 +39,6 @@ const projects = [
     link: "https://notifica.dgs.min-saude.pt",
   },
   {
-    title: "",
-    desc: "",
-    link: "",
-  },
-  {
     title: "Daytile: Habit Tracker",
     desc: "Daytile is a simple habit tracker IOS app.",
     link: "https://dcoelhoo.github.io/daytile-site/",
