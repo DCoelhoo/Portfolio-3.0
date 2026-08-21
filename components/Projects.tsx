@@ -19,11 +19,6 @@ const projects = [
     link: "https://github.com/DCoelhoo/Gym-Website",
   },
   {
-    title: "Personal Portfolio",
-    desc: "Developed with Next.js and Tailwind CSS, featuring Framer Motion animations and API integrations.",
-    link: "https://github.com/DCoelhoo/Portfolio-3.0",
-  },
-  {
     title: "Erasmus Project",
     desc: "Website developed using PHP and Laravel framework that enables users to view, search, and filter training or procedures descriptions based on a structured XML data source.",
     link: "https://github.com/DCoelhoo/Portfolio-3.0",
