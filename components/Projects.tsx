@@ -29,7 +29,7 @@ const projects = [
     link: "https://upropertymarket.pt",
   },
   {
-    title: "DGS Notifica",
+    title: "Notifica - Segurança do Doente",
     desc: "NOTIFICA is the national platform for reporting and managing patient-safety incidents across the healthcare system.",
     link: "https://notifica.dgs.min-saude.pt",
   },
