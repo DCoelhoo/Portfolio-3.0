@@ -1,6 +1,6 @@
 "use client"
 
-import { Github, Linkedin, Mail } from "lucide-react"
+import { Github, Linkedin, Mail, Link } from "lucide-react"
 import socials from "@/data/socials.json"
 
 /**
@@ -18,6 +18,17 @@ export function Footer() {
 
         {/* Social Media Links */}
         <div className="flex gap-4">
+
+          <a
+            href={socials.linktree}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors cursor-pointer"
+            aria-label="Linktree"
+          >
+            <Link size={18} />
+          </a>
+          
           <a
             href={socials.github}
             target="_blank"
